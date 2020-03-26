@@ -22,7 +22,7 @@ os:
  - macos
 
 dist:
- - xenial
+# - xenial
  - bionic
 
 cache:
@@ -34,7 +34,7 @@ r:
   - devel
 
 # definitely not required, but may give better travis reporting
-use_devtools: true
+# use_devtools: true
 
 #addons:
 #  apt:
@@ -63,8 +63,6 @@ env:
     # avoid the default install script upgrading packages we already installed from r-cran-xxx apt
     - R_REMOTES_UPGRADE=never
     - ICD_MINIBENCH=false
-  jobs:
-    - ICD_JUSTTEST=false
     - ICD_JUSTTEST=true
 
 # this is great, but brew doesn't link to path by default: either brew link --force (or --overwrite?), or add to $PATH
@@ -84,7 +82,7 @@ before_install:
   # ignore the stubs for the pre-built vignettes, as the latex environments on travis are heterogeneous!
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore
   # we do not need to install a ton of heavy dependencies just to run tests. travis installs suggests by default. This will cause warnings in the CRAN check, of course.
-  - if [[ "$ICD_JUSTTEST" == "true" ]]l; then sed -e '/^Suggests:/,/LinkingTo:/c\LinkingTo:\' DESCRIPTION.orig | sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr'; fi
+  - if [[ "$ICD_JUSTTEST" == "true" ]]l; then sed -i -e '/^Suggests:/,/LinkingTo:/c\LinkingTo:\\'; sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr' DESCRIPTION; fi
 
   # https://github.com/Homebrew/homebrew-core/blob/master/Formula/gcc.rb
   # I think PKG_CXX etc only needed in environment, or Makevars in the package itself? not ~/.R/Makevars.
