@@ -81,6 +81,7 @@ r_binary_packages:
   - rappdirs
   - readxl
   - rematch
+  - remotes
   - rlang
   - rmarkdown
   - roxygen2
@@ -103,6 +104,8 @@ env:
     global:
         # don't know whether this is needed:
         - HOMEBREW_NO_INSTALL_CLEANUP=1
+        # avoid the default install script upgrading packages we already installed from r-cran-xxx apt
+        - R_REMOTES_UPGRADE=never
 
 brew_packages:
   - gcc
