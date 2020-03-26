@@ -157,6 +157,7 @@ jobs:
       - ICD_MINI_BENCH=true
   - r: release
     compiler: gcc
+    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
@@ -166,6 +167,7 @@ jobs:
     - ICD_TEST_SLOW=true
   - r: oldrel
     compiler: gcc
+    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
@@ -198,6 +200,7 @@ jobs:
     #env: ICD_USE_XCODE_CLANG=true
   - r: devel
     os: osx
+    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
@@ -206,6 +209,7 @@ jobs:
     - ICD_MINI_BENCH=true
   - r: release
     os: osx
+    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
@@ -214,6 +218,8 @@ jobs:
     - ICD_MINI_BENCH=true
   - r: release
     arch: arm64
+    # linux assumes amd64 in current default R travis
+    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
@@ -229,8 +235,15 @@ jobs:
   - r: oldrel
     # if these things are not matched exactly to the job, or top-level environment, etc., this won't allow failure?
   - r: release
+    compiler: gcc
+    pandoc: false
+    latex: false
+    r_build_args: --no-build-vignettes --no-manual --resave-data=no
+    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
     - ICD_COVERAGE=true
+    - ICD_MINI_BENCH=false
+    - ICD_TEST_SLOW=true
 
 before_script:
 # n.b., before_install bash exports are not preserved beyond each shell invocation.
