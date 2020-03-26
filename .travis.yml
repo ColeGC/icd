@@ -28,21 +28,88 @@ cache:
 #  apt:
 #    packages:
 #      - valgrind # when I do do this (probably too slow for travis anyway, then just put the apt addon in the specific build)
-      #- r-cran-tinytex
-
-#r_packages:
-#  - tinytex
 
 cran: https://cloud.r-project.org
 # by default, DON'T do --as-cran, as it stops us using environment variables
-# that conflict. Instead, state approximate CRAN check environment variables explicitly.
-r_check_args: ""
+# that conflict. Instead, state approximate CRAN check environment variables explicitly. Blank is ignored? Try a non-empty innocuous argument.
+r_check_args: '--timings'
 warnings_are_errors: true
+# this long list is due to the long chain of build dependencies, mostly due to tidyverse stuff. Will look for a way to slim this, e.g. although I do use readxl, this is not necessarily tested every time.
+# N.b., these versions may be a bit older, and especially for compiled packages, they may need to be rebuilt anyway against Rcpp with the chosen compiler. MacOS builds are from source anyway, so it may be okay.
+r_binary_packages:
+  - R6
+  - RODBC
+  - Rcpp
+  - RcppEigen
+  - askpass
+  - assertthat
+  - backports
+  - base64enc
+  - brew
+  - callr
+  - cellranger
+  - cli
+  - commonmark
+  - crayon
+  - curl
+  - desc
+  - digest
+  - ellipsis
+  - evaluate
+  - fansi
+  - glue
+  - highr
+  - hms
+  - htmltools
+  - httr
+  - jsonlite
+  - knitr
+  - magrittr
+  - markdown
+  - mime
+  - nhds
+  - openssl
+  - pillar
+  - pkgbuild
+  - pkgconfig
+  - pkgload
+  - praise
+  - prettyunits
+  - processx
+  - progress
+  - ps
+  - purrr
+  - rappdirs
+  - readxl
+  - rematch
+  - rlang
+  - rmarkdown
+  - roxygen2
+  - rprojroot
+  - rstudioapi
+  - stringi
+  - stringr
+  - sys
+  - testthat
+  - tibble
+  - tinytex
+  - utf8
+  - vctrs
+  - withr
+  - xfun
+  - xml2
+  - yaml
+
+
+env:
+    global:
+        # don't know whether this is needed:
+        - HOMEBREW_NO_INSTALL_CLEANUP=1
+
+brew_packages:
+  - gcc
 
 before_install:
-  # - set -o allexport; source tools/env/travis-global; set +o allexport;
-  # May need to set the R library directory so R CMD check finds packages
-  # installed by travis (automatically, and in my scripts) and by R itself
   # https://stackoverflow.com/questions/31879011/r-cant-find-packages-installed-by-travis
   # - mkdir -p "$HOME/R.icd.lib"
   # - echo R_LIBS=$HOME/R.icd.lib:/usr/lib/R/site-library/" > ~/.Renviron
@@ -55,27 +122,22 @@ before_install:
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore
 
   # https://github.com/Homebrew/homebrew-core/blob/master/Formula/gcc.rb
-  # I think PKG_CXX etc only needed if Makevars in the package itself, not ~/.R/Makevars
+  # I think PKG_CXX etc only needed in environment, or Makevars in the package itself? not ~/.R/Makevars. 
   # openblas may need brew linking. may be best NOT to overwrite gfortran?
-  - export HOMEBREW_NO_INSTALL_CLEANUP=1 && if [[ "$(uname -s)" = 'Darwin' ]] && [[ $ICD_USE_XCODE_CLANG != 'true' ]]; then
-      brew upgrade ;
-      brew install gcc ;
-      brew link --overwrite gcc ;
-      cat tools/mk/travis-macos.mk  >> ~/.R/Makevars ;
-      Rscript -e 'install.packages("Rcpp", type = "source")' ;
-    fi
+  # the R travis module has its own brew_packages command. If we are using Xcode toolchain, we can use the R module command 'disable_homebrew'
+  #  - export HOMEBREW_NO_INSTALL_CLEANUP=1 && if [[ "$(uname -s)" = 'Darwin' ]] && [[ $ICD_USE_XCODE_CLANG != 'true' ]]; then
+  #      brew upgrade ;
+  #      brew install gcc ;
+  #      brew link --overwrite gcc ;
+  #      cat tools/mk/travis-macos.mk  >> ~/.R/Makevars ;
+  #      Rscript -e 'install.packages("Rcpp", type = "source")' ;
+  #    fi
+  - pwd
   - cat ~/.R/Makevars
   - cat .Rbuildignore
+  - [ -f /etc/.Renviron ] && cat /etc/.Renviron
+  - [ -f ~/.Renviron ] && cat ~/.Renviron
   - Rscript -e '.libPaths(); getOption("repos")'
-  - pwd
-  # for the pre-built static vignette stubs to include the actual vignettes.
-  # Make sure travis latex: true is set just for relevant builds. Official way to add latex packages is:
-  # before_install:
-  #   - tlmgr install index
-  # and/or? something like:
-  # - Rscript -e 'if (!require("tinytex", character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)) {quit(status=1)} else {tinytex::install_tinytex(); tinytex::tlmgr_install("pdfpages", "ae")}' || hash tlmgr 2>/dev/null && { tlmgr --usermode install pdfpages ae; }
-
-#env: #  global: instead of defining here, source tools/env/travis-global
 
 jobs:
   fast_finish: true
@@ -109,68 +171,65 @@ jobs:
   # MacOS: https://docs.travis-ci.com/user/languages/c/#gcc-on-macos
   - r: release
     os: osx
-    # xcode image is needed so things like _stdio.h are available to GCC.
+    # xcode image is needed so things like _stdio.h are available to homebrew gcc
     osx_image: xcode10.3
-#    compiler: gcc # redundant: done by logic in before_intall
+    disable_homebrew: false
     addons:
       homebrew:
         packages:
+          - gcc
           - checkbashisms
     env:
       - ICD_MINI_BENCH=true
   - r: devel
     os: osx
+    # xcode image is needed so things like _stdio.h are available to homebrew gcc
     osx_image: xcode10.3
+    disable_homebrew: false
     addons:
       homebrew:
         packages:
+          - gcc
           - checkbashisms
-#    compiler: gcc # redundant: done by logic in before_intall
   - r: devel
     os: osx
-    addons:
-      homebrew:
-        packages:
-          - checkbashisms
-    # as of May 2019, default osx image is 9.4.1
-    # https://docs.travis-ci.com/user/reference/osx#xcode-version
-    # compiler: clang # redundant
-    env: ICD_USE_XCODE_CLANG=true
-  - r: release
+    disable_homebrew: true
+    #env: ICD_USE_XCODE_CLANG=true
+  - r: devel
     os: osx
-    addons:
-      homebrew:
-        packages:
-          - checkbashisms
-    # compiler: clang # redundant
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
-    - ICD_USE_XCODE_CLANG=true
+        #- ICD_USE_XCODE_CLANG=true
+    - ICD_MINI_BENCH=true
+  - r: release
+    os: osx
+    latex: false
+    r_build_args: --no-build-vignettes --no-manual --resave-data=no
+    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
+    env:
+        #- ICD_USE_XCODE_CLANG=true
     - ICD_MINI_BENCH=true
   - r: release
     arch: arm64
+    latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
     - ICD_MINI_BENCH=true
     - ICD_TEST_SLOW=true
   allow_failures:
-  # allow any osx to fail for now: error prone tool chain
+  # allow any osx to fail for now: error prone tool chains
   - os: osx
   - arch: arm64
   - arch: ppc64le
   - arch: s390x
   - r: oldrel
+    # if these things are not matched exactly to the job, or top-level environment, etc., this won't allow failure?
   - r: release
-    latex: false
-    r_build_args: --no-build-vignettes --no-manual --resave-data=no
-    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
     - ICD_COVERAGE=true
-    - ICD_MINI_BENCH=false
-    - ICD_TEST_SLOW=true
 
 before_script:
 # n.b., before_install bash exports are not preserved beyond each shell invocation.
