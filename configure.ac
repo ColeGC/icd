@@ -87,12 +87,14 @@ AS_IF([test "x$enable_icd-shutup" = "xyes"], [
        ])
 
 # changes what R_OPENMP and rest of script does:
-AC_LANG(C++)
-
+AC_LANG([C++])
 # https://www.gnu.org/software/autoconf/manual/autoconf-2.67/html_node/Generic-Compiler-Characteristics.html
-
 # this macro is borrowed from R-devel source, and included in the icd /inst/m4 directory
+# --disable-openmp may then be passed to the configure script if needed.
+AC_MSG_CHECKING([R core OpenMP m4 macro])
 R_OPENMP
+AC_MSG_RESULT([completed check])
+
 
 # since some systems have broken OMP libraries
 # we also check that the actual package will work
@@ -101,7 +103,7 @@ ac_pkg_openmp=no
 #  AC_MSG_RESULT([Do have OPENMP_CFLAGS from R_OPENMP])
 #fi
 if test -n "${OPENMP_CXXFLAGS}"; then
-    AC_MSG_CHECKING([OpenMP available, but does it work in a package])
+    AC_MSG_CHECKING([OpenMP available, but does it work in a package?])
     AC_LANG_CONFTEST(
                      [AC_LANG_PROGRAM([[#include <omp.h>]], [[ omp_get_num_threads (); return 0; ]])])
     PKG_CFLAGS="${OPENMP_CFLAGS}" PKG_LIBS="${OPENMP_CFLAGS}" "$R_BIN" CMD SHLIB conftest.c 1>&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD && "$R_BIN" --vanilla -q -e "dyn.load(paste('conftest',.Platform\$dynlib.ext,sep=''))" 1>&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD && ac_pkg_openmp=yes
@@ -110,7 +112,7 @@ if test -n "${OPENMP_CXXFLAGS}"; then
         AC_MSG_RESULT([R did not think OpenMP is available])
         fi
 
-        AC_MSG_RESULT([icd thinks openmp compilation possible: ${ac_pkg_openmp}])
+        AC_MSG_RESULT([icd thinks openmp compilation is possible: ${ac_pkg_openmp}])
 
         # if ${ac_pkg_openmp} = "yes" then we have OMP, otherwise it will be "no"
         if test "${ac_pkg_openmp}" = no; then
