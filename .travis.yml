@@ -20,6 +20,7 @@ language: r
 os:
  - linux
  - macos
+
 dist:
  - xenial
  - bionic
@@ -66,6 +67,7 @@ env:
     - ICD_JUSTTEST=false
     - ICD_JUSTTEST=true
 
+# this is great, but brew doesn't link to path by default: either brew link --force (or --overwrite?), or add to $PATH
 brew_packages:
   - gcc
 
@@ -76,6 +78,7 @@ before_install:
   # - sudo chmod 2777 "$HOME/R.icd.lib"
   - mkdir -p ~/.R ;
   - if [[ $TRAVIS_R_VERSION_STRING == devel ]]; then cat tools/mk/travis-debug.mk >> ~/.R/Makevars; fi;
+    # TODO add --enable-icd-* configure args to help debug
   # this is one of oldrel, release or devel per https://docs.travis-ci.com/user/languages/r#configuration-options
   - cat tools/mk/travis-nowarn.mk >> ~/.R/Makevars
   # ignore the stubs for the pre-built vignettes, as the latex environments on travis are heterogeneous!
@@ -122,6 +125,7 @@ jobs:
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
+    - ICD_JUSTTEST=true
     - ICD_COVERAGE=true
     - ICD_MINI_BENCH=false
     - ICD_TEST_SLOW=true
@@ -131,6 +135,8 @@ jobs:
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
+    env:
+    - ICD_JUSTTEST=true
     #--install-args='--configure-args=--disable-openmp'
   # MacOS: https://docs.travis-ci.com/user/languages/c/#gcc-on-macos
   - r: release
@@ -166,6 +172,7 @@ jobs:
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
+    - ICD_JUSTTEST=true
         #- ICD_USE_XCODE_CLANG=true
     - ICD_MINI_BENCH=true
   - r: release
@@ -175,6 +182,7 @@ jobs:
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
     env:
+    - ICD_JUSTTEST=true
         #- ICD_USE_XCODE_CLANG=true
     - ICD_MINI_BENCH=true
  #  - r: release
