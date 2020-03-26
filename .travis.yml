@@ -247,7 +247,7 @@ jobs:
 
 before_script:
 # n.b., before_install bash exports are not preserved beyond each shell invocation.
- - if [[ $TRAVIS_OS_NAME == "osx" ]] && [[ command -v brew >/dev/null ]]; then brew link --force gcc || true; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && command -v brew >/dev/null; then brew link --force gcc || true; fi
  - set -o allexport; source tools/env/travis-global; set +o allexport;
  - echo "$LD_LIBRARY_PATH"
  - if [ x"$ICD_TEST_SLOW" = x"true" ]; then
@@ -257,7 +257,7 @@ before_script:
 
 after_script:
  # should fail and stop travis with error if the quick benchmark code fails
- - if [ x"$ICD_MINI_BENCH" = x"true" ]; then
+ - if [[ "$ICD_MINI_BENCH" == "true" ]]; then
      cd benchmarks/icd-JSS3447-replication;
      eval "make bench3"
      eval "make replmat"
@@ -265,7 +265,7 @@ after_script:
    fi
 
 after_success:
- - if [ "$ICD_COVERAGE" = "true" ]; then
+ - if [[ "$ICD_COVERAGE" == "true" ]]; then
      Rscript -e 'source("tools/split-tests.R"); testthat_split();';
      Rscript -e 'install.packages("covr"); covr::codecov(quiet = FALSE)';
    fi
