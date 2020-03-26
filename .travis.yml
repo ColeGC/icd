@@ -232,12 +232,11 @@ jobs:
 before_script:
 # n.b., before_install bash exports are not preserved beyond each shell invocation.
  - set -o allexport; source tools/env/travis-global; set +o allexport;
- - set
  - echo "$LD_LIBRARY_PATH"
  - if [ x"$ICD_TEST_SLOW" = x"true" ]; then
      Rscript -e 'source("tools/split-tests.R"); testthat_split();';
    fi
- - printenv
+ - printenv | sort
 
 after_script:
  # should fail and stop travis with error if the quick benchmark code fails
