@@ -67,7 +67,6 @@ r_binary_packages:
   - magrittr
   - markdown
   - mime
-  - nhds
   - openssl
   - pillar
   - pkgbuild
@@ -99,7 +98,6 @@ r_binary_packages:
   - xfun
   - xml2
   - yaml
-
 
 env:
     global:
