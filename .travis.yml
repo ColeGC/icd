@@ -75,15 +75,19 @@ before_install:
   # - echo R_LIBS=$HOME/R.icd.lib:/usr/lib/R/site-library/" > ~/.Renviron
   # - sudo chmod 2777 "$HOME/R.icd.lib"
   - mkdir -p ~/.R ;
-  - if [[ $TRAVIS_R_VERSION_STRING == devel ]]; then cat tools/mk/travis-debug.mk >> ~/.R/Makevars; fi;
+  # TRAVIS_R_VERSION_STRING is one of oldrel, release or devel per https://docs.travis-ci.com/user/languages/r#configuration-options
+  - if [[ "$TRAVIS_R_VERSION_STRING" == devel ]]; then cat tools/mk/travis-debug.mk >> ~/.R/Makevars; fi;
     # TODO add --enable-icd-* configure args to help debug
-  # this is one of oldrel, release or devel per https://docs.travis-ci.com/user/languages/r#configuration-options
-  - cat tools/mk/travis-nowarn.mk >> ~/.R/Makevars
   # ignore the stubs for the pre-built vignettes, as the latex environments on travis are heterogeneous!
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore
   # we do not need to install a ton of heavy dependencies just to run tests. travis installs suggests by default. This will cause warnings in the CRAN check, of course.
-  - if [[ "$ICD_JUSTTEST" == "true" ]]l; then sed -i -e '/^Suggests:/,/LinkingTo:/c\LinkingTo:\\'; sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr' DESCRIPTION; fi
-
+  - >
+   if [[ "$ICD_JUSTTEST" == "true" ]]; then
+     sed -e '/^Suggests:/,/LinkingTo:/c\LinkingTo:\\' DESCRIPTION |
+     sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr' >DESCRIPTION.justtest
+     mv DESCRIPTION.justtest DESCRIPTION
+   fi
+  - cat tools/mk/travis-nowarn.mk >> ~/.R/Makevars
   # https://github.com/Homebrew/homebrew-core/blob/master/Formula/gcc.rb
   # I think PKG_CXX etc only needed in environment, or Makevars in the package itself? not ~/.R/Makevars.
   # openblas may need brew linking. may be best NOT to overwrite gfortran?
