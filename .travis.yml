@@ -216,20 +216,20 @@ jobs:
     env:
         #- ICD_USE_XCODE_CLANG=true
     - ICD_MINI_BENCH=true
-  - r: release
-    arch: arm64
-    # linux assumes amd64 in current default R travis
-    pandoc: false
-    latex: false
-    r_build_args: --no-build-vignettes --no-manual --resave-data=no
-    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
-    env:
-    - ICD_MINI_BENCH=true
-    - ICD_TEST_SLOW=true
+ #  - r: release
+ #    arch: arm64
+ #    # linux assumes amd64 in current default R travis
+ #    pandoc: false
+ #    latex: false
+ #    r_build_args: --no-build-vignettes --no-manual --resave-data=no
+ #    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
+ #    env:
+ #    - ICD_MINI_BENCH=true
+ #    - ICD_TEST_SLOW=true
   allow_failures:
   # allow any osx to fail for now: error prone tool chains
   - os: osx
-  - arch: arm64
+ # - arch: arm64
   - arch: ppc64le
   - arch: s390x
   - r: oldrel
