@@ -157,7 +157,6 @@ jobs:
       - ICD_MINI_BENCH=true
   - r: release
     compiler: gcc
-    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
@@ -170,7 +169,8 @@ jobs:
     pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
-    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual --install-args='--configure-args=--disable-openmp'
+    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
+    #--install-args='--configure-args=--disable-openmp'
   # MacOS: https://docs.travis-ci.com/user/languages/c/#gcc-on-macos
   - r: release
     os: osx
@@ -236,7 +236,6 @@ jobs:
     # if these things are not matched exactly to the job, or top-level environment, etc., this won't allow failure?
   - r: release
     compiler: gcc
-    pandoc: false
     latex: false
     r_build_args: --no-build-vignettes --no-manual --resave-data=no
     r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
