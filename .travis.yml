@@ -122,7 +122,7 @@ before_install:
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore
 
   # https://github.com/Homebrew/homebrew-core/blob/master/Formula/gcc.rb
-  # I think PKG_CXX etc only needed in environment, or Makevars in the package itself? not ~/.R/Makevars. 
+  # I think PKG_CXX etc only needed in environment, or Makevars in the package itself? not ~/.R/Makevars.
   # openblas may need brew linking. may be best NOT to overwrite gfortran?
   # the R travis module has its own brew_packages command. If we are using Xcode toolchain, we can use the R module command 'disable_homebrew'
   #  - export HOMEBREW_NO_INSTALL_CLEANUP=1 && if [[ "$(uname -s)" = 'Darwin' ]] && [[ $ICD_USE_XCODE_CLANG != 'true' ]]; then
@@ -135,8 +135,8 @@ before_install:
   - pwd
   - cat ~/.R/Makevars
   - cat .Rbuildignore
-  - [ -f /etc/.Renviron ] && cat /etc/.Renviron
-  - [ -f ~/.Renviron ] && cat ~/.Renviron
+  - if [[ -f /etc/.Renviron ]] && cat /etc/.Renviron
+  - if [[ -f ~/.Renviron ]] && cat ~/.Renviron
   - Rscript -e '.libPaths(); getOption("repos")'
 
 jobs:
