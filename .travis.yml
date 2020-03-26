@@ -135,8 +135,8 @@ before_install:
   - pwd
   - cat ~/.R/Makevars
   - cat .Rbuildignore
-  - if [[ -f /etc/.Renviron ]] && cat /etc/.Renviron
-  - if [[ -f ~/.Renviron ]] && cat ~/.Renviron
+  - if [[ -f /etc/.Renviron ]]; then cat /etc/.Renviron; fi
+  - if [[ -f ~/.Renviron ]]; then cat ~/.Renviron; fi
   - Rscript -e '.libPaths(); getOption("repos")'
 
 jobs:
@@ -239,6 +239,7 @@ before_script:
  - if [ x"$ICD_TEST_SLOW" = x"true" ]; then
      Rscript -e 'source("tools/split-tests.R"); testthat_split();';
    fi
+ - printenv
 
 after_script:
  # should fail and stop travis with error if the quick benchmark code fails
