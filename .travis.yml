@@ -17,95 +17,54 @@ language: r
 # https://docs.travis-ci.com/user/languages/cpp/
 
 # assert the defaults for os and dist - will add macos and bionic etc. later
-os: linux
-dist: xenial
+os:
+ - linux
+ - macos
+dist:
+ - xenial
+ - bionic
 
 cache:
   - packages
   - ccache
+
+r:
+  - release
+  - devel
+
+# definitely not required, but may give better travis reporting
+use_devtools: true
 
 #addons:
 #  apt:
 #    packages:
 #      - valgrind # when I do do this (probably too slow for travis anyway, then just put the apt addon in the specific build)
 
-cran: https://cloud.r-project.org
+repos:
+  CRAN: https://cloud.r-project.org
 # by default, DON'T do --as-cran, as it stops us using environment variables
 # that conflict. Instead, state approximate CRAN check environment variables explicitly. Blank is ignored? Try a non-empty innocuous argument.
 r_check_args: '--timings'
-warnings_are_errors: true
-# this long list is due to the long chain of build dependencies, mostly due to tidyverse stuff. Will look for a way to slim this, e.g. although I do use readxl, this is not necessarily tested every time.
+# default is true, which I would like; but false for travis-tricky platform/toolchain combos eventually
+warnings_are_errors: false
+# this will be a long list if all data extraction and devleopment dependencies are included. Will look for a way to slim this, e.g. although I do use readxl, this is not necessarily tested every time.
 # N.b., these versions may be a bit older, and especially for compiled packages, they may need to be rebuilt anyway against Rcpp with the chosen compiler. MacOS builds are from source anyway, so it may be okay.
 r_binary_packages:
-  - R6
-  - RODBC
   - Rcpp
   - RcppEigen
-  - askpass
-  - assertthat
-  - backports
-  - base64enc
-  - brew
-  - callr
-  - cellranger
-  - cli
-  - commonmark
-  - crayon
-  - curl
-  - desc
-  - digest
-  - ellipsis
-  - evaluate
-  - fansi
-  - glue
-  - highr
-  - hms
-  - htmltools
-  - httr
-  - jsonlite
-  - knitr
-  - magrittr
-  - markdown
-  - mime
-  - openssl
-  - pillar
-  - pkgbuild
-  - pkgconfig
-  - pkgload
-  - praise
-  - prettyunits
-  - processx
-  - progress
-  - ps
-  - purrr
   - rappdirs
-  - readxl
-  - rematch
-  - remotes
-  - rlang
-  - rmarkdown
-  - roxygen2
-  - rprojroot
-  - rstudioapi
-  - stringi
-  - stringr
-  - sys
   - testthat
-  - tibble
-  - tinytex
-  - utf8
-  - vctrs
-  - withr
-  - xfun
-  - xml2
-  - yaml
 
 env:
-    global:
-        # don't know whether this is needed:
-        - HOMEBREW_NO_INSTALL_CLEANUP=1
-        # avoid the default install script upgrading packages we already installed from r-cran-xxx apt
-        - R_REMOTES_UPGRADE=never
+  global:
+    # don't know whether this is needed:
+    - HOMEBREW_NO_INSTALL_CLEANUP=1
+    # avoid the default install script upgrading packages we already installed from r-cran-xxx apt
+    - R_REMOTES_UPGRADE=never
+    - ICD_MINIBENCH=false
+  jobs:
+    - ICD_JUSTTEST=false
+    - ICD_JUSTTEST=true
 
 brew_packages:
   - gcc
@@ -121,6 +80,8 @@ before_install:
   - cat tools/mk/travis-nowarn.mk >> ~/.R/Makevars
   # ignore the stubs for the pre-built vignettes, as the latex environments on travis are heterogeneous!
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore
+  # we do not need to install a ton of heavy dependencies just to run tests. travis installs suggests by default. This will cause warnings in the CRAN check, of course.
+  - if [[ "$ICD_JUSTTEST" == "true" ]]l; then sed -e '/^Suggests:/,/LinkingTo:/c\LinkingTo:\' DESCRIPTION.orig | sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr'; fi
 
   # https://github.com/Homebrew/homebrew-core/blob/master/Formula/gcc.rb
   # I think PKG_CXX etc only needed in environment, or Makevars in the package itself? not ~/.R/Makevars.
@@ -229,11 +190,9 @@ jobs:
   allow_failures:
   # allow any osx to fail for now: error prone tool chains
   - os: osx
- # - arch: arm64
-  - arch: ppc64le
-  - arch: s390x
   - r: oldrel
     # if these things are not matched exactly to the job, or top-level environment, etc., this won't allow failure?
+  - env: ICD_JUSTTEST=true
   - r: release
     compiler: gcc
     latex: false
