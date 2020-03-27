@@ -45,11 +45,14 @@ repos:
   CRAN: https://cloud.r-project.org
 # by default, DON'T do --as-cran, as it stops us using environment variables
 # that conflict. Instead, state approximate CRAN check environment variables explicitly. Blank is ignored? Try a non-empty innocuous argument.
-r_check_args: '--timings'
+#r_check_args: '--timings'
 # default is true, which I would like; but false for travis-tricky platform/toolchain combos eventually
 warnings_are_errors: false
 # this will be a long list if all data extraction and devleopment dependencies are included. Will look for a way to slim this, e.g. although I do use readxl, this is not necessarily tested every time.
 # N.b., these versions may be a bit older, and especially for compiled packages, they may need to be rebuilt anyway against Rcpp with the chosen compiler. MacOS builds are from source anyway, so it may be okay.
+# These come from: https://launchpad.net/~marutter/+archive/ubuntu/c2d4u3.5 (which has the LTS versions). Another PPA has each Ubuntu release binaries.
+# These (should) be installed in /usr/lib/R/site-library/ which is NOT on the default library search path in travis! The default paths in current travis look like:
+# "/home/travis/R/Library", "/usr/local/lib/R/site-library", "/home/travis/R-bin/lib/R/library"
 r_binary_packages:
   - Rcpp
   - RcppEigen
@@ -59,9 +62,9 @@ r_binary_packages:
 env:
   global:
     # don't know whether this is needed:
-    - HOMEBREW_NO_INSTALL_CLEANUP=1
+#    - HOMEBREW_NO_INSTALL_CLEANUP=1
     # avoid the default install script upgrading packages we already installed from r-cran-xxx apt
-    - R_REMOTES_UPGRADE=never
+#    - R_REMOTES_UPGRADE=never
     - ICD_MINIBENCH=false
     - ICD_JUSTTEST=true
 
@@ -72,8 +75,15 @@ brew_packages:
 before_install:
   # https://stackoverflow.com/questions/31879011/r-cant-find-packages-installed-by-travis
   # - mkdir -p "$HOME/R.icd.lib"
-  # - echo R_LIBS=$HOME/R.icd.lib:/usr/lib/R/site-library/" > ~/.Renviron
-  # - sudo chmod 2777 "$HOME/R.icd.lib"
+  - if [[ -f /etc/.Renviron ]]; then cat /etc/.Renviron; fi
+  # put the installed packages' path in the environment!
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      echo R_LIBS="/usr/lib/R/site-library/:/home/travis/R/Library:usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library" > ~/.Renviron
+    fi
+  - cp ~/.Renviron .R/check.Renviron
+  - cp ~/.Renviron .R/build.Renviron
+  - cat tools/env/travis-global >> .R/check.Renviron
+  - cat tools/env/travis-global >> .R/build.Renviron
   - mkdir -p ~/.R ;
   # TRAVIS_R_VERSION_STRING is one of oldrel, release or devel per https://docs.travis-ci.com/user/languages/r#configuration-options
   - if [[ "$TRAVIS_R_VERSION_STRING" == devel ]]; then cat tools/mk/travis-debug.mk >> ~/.R/Makevars; fi;
@@ -84,7 +94,7 @@ before_install:
   - >
    if [[ "$ICD_JUSTTEST" == "true" ]]; then
      sed -e '/^Suggests:/,/LinkingTo:/c\LinkingTo:\\' DESCRIPTION |
-     sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr' >DESCRIPTION.justtest
+     sed -e '/LinkingTo:/iSuggests:\n    testthat\n    magrittr' | tee DESCRIPTION.justtest
      mv DESCRIPTION.justtest DESCRIPTION
    fi
   - cat tools/mk/travis-nowarn.mk >> ~/.R/Makevars
@@ -100,8 +110,8 @@ before_install:
   #      Rscript -e 'install.packages("Rcpp", type = "source")' ;
   #    fi
   - pwd
-  - cat ~/.R/Makevars
-  - cat .Rbuildignore
+  - if [[ -f ~/.R/Makevars ]]; then cat ~/.R/Makevars; fi
+  - if [[ -f .Rbuildignore ]]; then cat .Rbuildignore; fi
   - if [[ -f /etc/.Renviron ]]; then cat /etc/.Renviron; fi
   - if [[ -f ~/.Renviron ]]; then cat ~/.Renviron; fi
   - Rscript -e '.libPaths(); getOption("repos")'
@@ -203,20 +213,11 @@ jobs:
   - r: oldrel
     # if these things are not matched exactly to the job, or top-level environment, etc., this won't allow failure?
   - env: ICD_JUSTTEST=true
-  - r: release
-    compiler: gcc
-    latex: false
-    r_build_args: --no-build-vignettes --no-manual --resave-data=no
-    r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
-    env:
-    - ICD_COVERAGE=true
-    - ICD_MINI_BENCH=false
-    - ICD_TEST_SLOW=true
+  - env: ICD_COVERAGE=true # probably won't work to allow failure
 
 before_script:
-# n.b., before_install bash exports are not preserved beyond each shell invocation.
- - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && command -v brew >/dev/null; then brew link --force gcc || true; fi
- - set -o allexport; source tools/env/travis-global; set +o allexport;
+# - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && command -v brew >/dev/null; then brew link --force gcc || true; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then command -v gcc && gcc --version || true; fi
  - echo "$LD_LIBRARY_PATH"
  - if [ x"$ICD_TEST_SLOW" = x"true" ]; then
      Rscript -e 'source("tools/split-tests.R"); testthat_split();';
