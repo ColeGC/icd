@@ -76,11 +76,17 @@ before_install:
   - mkdir -p ~/.R;
   - pwd;
   # https://stackoverflow.com/questions/31879011/r-cant-find-packages-installed-by-travis
+  # R documentation library path is spread over Internals, WRE, and Admin, including:
+  # https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Managing-libraries
+  # which travis ruby script uses.
+  #
   # - mkdir -p "$HOME/R.icd.lib"
   - if [[ -f /etc/.Renviron ]]; then cat /etc/.Renviron; fi
-  # put the installed packages' path in the environment!
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      echo R_LIBS="/home/travis/R/Library:usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library:/usr/lib/R/site-library/" > ~/.Renviron;
+  # put the installed packages' path in the environment! Travis rb does/overrides this?
+  - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+      echo R_LIBS="/home/travis/R/Library:/usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library:/usr/lib/R/site-library" >> ~/.Renviron;
+      echo R_LIBS_USER="/home/travis/R/Library:usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library" >> ~/.Renviron;
+      echo R_LIBS_SITE="/usr/local/lib/R/site-library:/usr/lib/R/site-library" >> ~/.Renviron;
       cp ~/.Renviron ~/.R/check.Renviron;
       cp ~/.Renviron ~/.R/build.Renviron;
     fi;
