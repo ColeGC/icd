@@ -78,7 +78,7 @@ before_install:
   - if [[ -f /etc/.Renviron ]]; then cat /etc/.Renviron; fi
   # put the installed packages' path in the environment!
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      echo R_LIBS="/usr/lib/R/site-library/:/home/travis/R/Library:usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library" > ~/.Renviron
+      echo R_LIBS="/usr/lib/R/site-library/:/home/travis/R/Library:usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library" > ~/.Renviron;
     fi
   - cp ~/.Renviron .R/check.Renviron
   - cp ~/.Renviron .R/build.Renviron
