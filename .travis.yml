@@ -74,15 +74,16 @@ brew_packages:
 
 before_install:
   - mkdir -p ~/.R;
+  - pwd;
   # https://stackoverflow.com/questions/31879011/r-cant-find-packages-installed-by-travis
   # - mkdir -p "$HOME/R.icd.lib"
   - if [[ -f /etc/.Renviron ]]; then cat /etc/.Renviron; fi
   # put the installed packages' path in the environment!
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo R_LIBS="/usr/lib/R/site-library/:/home/travis/R/Library:usr/local/lib/R/site-library:/home/travis/R-bin/lib/R/library" > ~/.Renviron;
-      cp ~/.Renviron .R/check.Renviron;
-      cp ~/.Renviron .R/build.Renviron;
-    fi
+      cp ~/.Renviron ~/.R/check.Renviron;
+      cp ~/.Renviron ~/.R/build.Renviron;
+    fi;
   - cat tools/env/travis-global >> ~/.R/check.Renviron;
   - cat tools/env/travis-global >> ~/.R/build.Renviron;
   # TRAVIS_R_VERSION_STRING is one ofldrel, release or devel per https://docs.travis-ci.com/user/languages/r#configuration-options
