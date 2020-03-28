@@ -5,7 +5,7 @@
 # https://docs.travis-ci.com/user/build-matrix/
 # https://docs.travis-ci.com/user/languages/cpp/
 
-language: R
+language: r
 cache: packages
 warnings_are_errors: false
 pandoc: false
@@ -14,59 +14,60 @@ latex: false
 r_build_args: --no-build-vignettes --no-manual --resave-data=no
 r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
 os:
-    - linux
-    - osx
+  - linux
+  - osx
 
-      #dist:
+# default 2020-03 is xenial, not bionic
+dist: xenial
 
 r:
-    - devel
-    - release
-    - oldrel
+  - devel
+  - release
+  - oldrel
 
 r_binary_packages:
-    - Rcpp
-    - RcppEigen
-    - rappdirs
-    - testthat
+  - Rcpp
+  - RcppEigen
+  - rappdirs
+  - testthat
 
+# see also travis-global environment file
 env:
-    global:
-        # see also travis-global environment file
-        - ICD_SHUTUP=true
-        - ICD_MINI_BENCH=false
-        - ICD_COVERAGE=false
-        - ICD_TEST_SLOW=false
-        - ICD_DATA_OFFLINE=true
-        - ICD_DATA_INTERACT=false
+  global:
+    - ICD_SHUTUP=true
+    - ICD_MINI_BENCH=false
+    - ICD_COVERAGE=false
+    - ICD_TEST_SLOW=false
+    - ICD_DATA_OFFLINE=true
+    - ICD_DATA_INTERACT=false
 
-    before_install:
-        - tools/dump-env.sh;
-        - mkdir -p ~/.R;
-        - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
-        - tools/DESCRIPTION-minimalize.sh;
+before_install:
+  - tools/dump-env.sh;
+  - mkdir -p ~/.R;
+  - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
+  - tools/DESCRIPTION-minimalize.sh;
 
-    after_success:
-        - tools/dump-env.sh 
-        - if [[ "$ICD_MINI_BENCH" == "true" ]]; then
-          cd benchmarks/icd-JSS3447-replication;
-          eval "make bench3";
-          eval "make replmat";
-          cd ../..;
-          fi
+after_success:
+  - tools/dump-env.sh 
+  - if [[ "$ICD_MINI_BENCH" == "true" ]]; then
+    cd benchmarks/icd-JSS3447-replication;
+    eval "make bench3";
+    eval "make replmat";
+    cd ../..;
+    fi
 
-    after_failure:
-        - tools/dump-env.sh;
+after_failure:
+  - tools/dump-env.sh;
 
-    before_script:
-        - tools/dump-env.sh; 
+before_script:
+  - tools/dump-env.sh; 
 
-    jobs:
-        fast_finish: true
-        allow_failures:
-            - os: osx
+jobs:
+  fast_finish: true
+  allow_failures:
+    - os: osx
 
-              notifications:
-                  email:
-                      on_success: change
-                      on_failure: always
+notifications:
+  email:
+    on_success: change
+    on_failure: always
