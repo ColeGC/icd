@@ -1,23 +1,32 @@
+# vim: tabstop=2 softtabstop=2 expandtab
 # https://docs.travis-ci.com/user/languages/r
 # https://ropensci.org/blog/2016/07/12/travis-osx
 # https://docs.travis-ci.com/user/ci-environment/
 # https://docs.travis-ci.com/user/languages/r
 # https://docs.travis-ci.com/user/build-matrix/
 # https://docs.travis-ci.com/user/languages/cpp/
-
+#
+# Use environment variables to tell R CMD check/build where to get environments
+# https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-and-building-packages
+# https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/script/r.rb
 language: r
 cache: packages
+# TODO: make warnings cause job failure once environment is fixed
 warnings_are_errors: false
+# I think fortran may be a downstream dependency of RcppEigen, but start v minimal
+fortran: false
 pandoc: false
 latex: false
-# can/will also do these with environment variables. I do want a vignette build on travis on at least one platform
+use_devtools: false
+disable_homebrew: true
+# can/will also set any/all build/check args with environment variables.
 r_build_args: --no-build-vignettes --no-manual --resave-data=no
 r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
 os:
   - linux
   - osx
 
-# default 2020-03 is xenial, not bionic
+# default 2020-04-01 is xenial, not bionic
 dist: xenial
 
 r:
@@ -25,6 +34,7 @@ r:
   - release
   - oldrel
 
+# Rcpp*, rappdirs and testthat all contain compiled code.
 r_binary_packages:
   - Rcpp
   - RcppEigen
@@ -41,31 +51,39 @@ env:
     - ICD_DATA_OFFLINE=true
     - ICD_DATA_INTERACT=false
 
+# Cannot export shell environment variables in these stanzas:
+# https://github.com/travis-ci/travis-ci/issues/7472
 before_install:
   - tools/dump-env.sh;
   - mkdir -p ~/.R;
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
-  - tools/DESCRIPTION-minimalize.sh;
+  - tools/DESCRIPTION-minimalize.sh > DESC.min && mv -f DESC.min DESCRIPTION;
+
+before_script:
+  - tools/dump-env.sh;
 
 after_success:
-  - tools/dump-env.sh 
+  - tools/dump-env.sh
   - if [[ "$ICD_MINI_BENCH" == "true" ]]; then
     cd benchmarks/icd-JSS3447-replication;
     eval "make bench3";
     eval "make replmat";
     cd ../..;
     fi
+  - if [[ "$ICD_COVERAGE" == "true" ]]; then
+     Rscript -e 'source("tools/split-tests.R"); testthat_split();';
+     Rscript -e 'install.packages("covr"); covr::codecov(quiet = FALSE)';
+   fi
 
 after_failure:
   - tools/dump-env.sh;
-
-before_script:
-  - tools/dump-env.sh; 
 
 jobs:
   fast_finish: true
   allow_failures:
     - os: osx
+    - r: oldrel
+    - r: devel
 
 notifications:
   email:

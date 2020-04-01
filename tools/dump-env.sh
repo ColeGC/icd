@@ -16,7 +16,11 @@ if command -v brew >/dev/null; then
 fi
 ## debian/ubuntu
 if command -v apt >/dev/null; then
-    apt list r-cran*
+    apt list --installed r-cran*
+fi
+
+if command -v dpkg >/dev/null; then
+    dpkg -L r-cran-rcpp || true
 fi
 
 command -v R
@@ -46,23 +50,26 @@ cat "${RHE}/ldpaths"
 R CMD config --all
 
 ls -R ~/.R
-ls -R "${PWD}"
+#ls -R "${PWD}"
 
 # R
 
 ## libraries
 declare -a pths
 pths=("${HOME}/R/Library" 
-    "${HOME}"/R-bin/lib/R/library 
-    "${RH}"/{site-,}library 
-    /usr/{local/,}lib/R/{site-,}library 
-    )
+"${HOME}"/R-bin/lib/R/library 
+"${RH}"/{site-,}library 
+/usr/{local/,}lib/R/{site-,}library 
+)
 for lib in "${pths[@]}"; do
-    echo -n "R library path: $lib: "
-    ! [[ -d "$lib" ]] && echo "NOT present" && continue
-    echo "present"
-    ls "$lib"
+    {
+        ! [[ -d "$lib" ]] && 
+            echo "R library path: $lib NOT present" &&
+            continue;
 
+        echo "R library path: $lib is present";
+        ls -l "$lib";
+    }
 done
 
 R --slave <<_EOF
@@ -74,8 +81,10 @@ print.default(.libPaths(), quote = FALSE)
 .Library.site
 searchpaths()
 search()
+sessionInfo() 
+if (requireNamespace("sessioninfo", quietly = TRUE, warn.conflicts = FALSE)) sessioninfo::session_info()
 _EOF
 
 # this package
-[[ -f .Rbuildignore ]] && cat .Rbuildignore
-[[ -f .Rinstignore ]] && cat .Rinstignore
+[[ -f .Rbuildignore ]] && cat .Rbuildignore || echo "No .Rbuildignore!" >&2
+[[ -f .Rinstignore ]] && cat .Rinstignore || echo "No .Rinstignore" >&2
