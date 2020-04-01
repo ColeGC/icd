@@ -10,6 +10,7 @@
 # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-and-building-packages
 # https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/script/r.rb
 language: r
+# ccache would need installing, configuring, can't just add ccache here, I don't think. Would it cache between builds if not here?
 cache: packages
 # TODO: make warnings cause job failure once environment is fixed
 warnings_are_errors: false
@@ -21,7 +22,7 @@ use_devtools: false
 disable_homebrew: true
 # can/will also set any/all build/check args with environment variables.
 r_build_args: --no-build-vignettes --no-manual --resave-data=no
-r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
+r_check_args: --no-build-vignettes --no-manual --no-vignettes --ignore-vignettes --no-codoc
 os:
   - linux
   - osx
@@ -58,6 +59,9 @@ before_install:
   - mkdir -p ~/.R;
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
   - tools/DESCRIPTION-minimalize.sh > DESC.min && mv -f DESC.min DESCRIPTION;
+    # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
+  - echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" |
+    tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron"
 
 before_script:
   - tools/dump-env.sh;

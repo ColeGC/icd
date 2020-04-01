@@ -15,12 +15,10 @@ if command -v brew >/dev/null; then
     brew environment
 fi
 ## debian/ubuntu
-if command -v apt >/dev/null; then
-    apt list --installed r-cran*
-fi
-
 if command -v dpkg >/dev/null; then
-    dpkg -L r-cran-rcpp || true
+    dpkg -l | grep -e r-cran -e r-base
+    dpkg -L r-cran-rcpp | sed 's/Rcpp\/.*$/Rcpp/' | sort -u || true
+    dpkg -L r-cran-rcppeigen | sed 's/RcppEigen\/.*$/RcppEigen/' | sort -u || true
 fi
 
 command -v R
@@ -68,12 +66,13 @@ for lib in "${pths[@]}"; do
             continue;
 
         echo "R library path: $lib is present";
-        ls -l "$lib";
+        ls -ld "$lib";
     }
 done
 
 R --slave <<_EOF
 options()
+options(echo=TRUE)
 print.default(.libPaths(), quote = FALSE)
 .Platform
 .dynLibs()
@@ -88,3 +87,6 @@ _EOF
 # this package
 [[ -f .Rbuildignore ]] && cat .Rbuildignore || echo "No .Rbuildignore!" >&2
 [[ -f .Rinstignore ]] && cat .Rinstignore || echo "No .Rinstignore" >&2
+cat DESCRIPTION || echo "No DESCRIPTION!" >&2
+
+true
