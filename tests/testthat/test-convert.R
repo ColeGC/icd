@@ -160,16 +160,16 @@ test_that("icd10 short to decimal", {
   expect_true(is.decimal_diag(short_to_decimal.icd10("A009")))
   expect_true(is.decimal_diag(short_to_decimal.icd10cm("A009")))
 
-  expect_equal(
+  expect_equivalent(
     as.decimal_diag(short_to_decimal("A00")), as.icd10("A00")
   )
-  expect_equal(
+  expect_equivalent(
     as.decimal_diag(short_to_decimal.icd10("A00")), as.icd10("A00")
   )
-  expect_equal(
+  expect_equivalent(
     as.decimal_diag(short_to_decimal("A000")), as.icd10("A00.0")
   )
-  expect_equal(
+  expect_equivalent(
     as.decimal_diag(short_to_decimal.icd10("A000")), as.icd10("A00.0")
   )
 })

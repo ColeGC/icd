@@ -46,11 +46,13 @@ r_binary_packages:
 env:
   global:
     - ICD_SHUTUP=true
+    - ICD_MAKEFILE
     - ICD_MINI_BENCH=false
     - ICD_COVERAGE=false
     - ICD_TEST_SLOW=false
     - ICD_DATA_OFFLINE=true
     - ICD_DATA_INTERACT=false
+    - ICD_KEEP_MAKEVARS=true
 
 # Cannot export shell environment variables in these stanzas:
 # https://github.com/travis-ci/travis-ci/issues/7472

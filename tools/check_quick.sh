@@ -1,12 +1,12 @@
 #!/bin/bash
 #shellcheck disable=SC2012
 set -euo pipefail
-whereami="$(dirname "${BASH_SOURCE[0]}")"
-#shellcheck source=find-icd-home.sh
-source "${whereami}/find-icd-home.sh"
-# ICD_HOME=$(find_icd_home)
-
 IFS=$'\n\t'
+#whereami="$(dirname "${BASH_SOURCE[0]}")"
+#shellcheck source=find-icd-home.sh
+#source "${whereami}/find-icd-home.sh"
+ICD_HOME="${ICD_HOME:-$(dirname "${BASH_SOURCE[0]}")}"
+
 tmpd=$(mktemp -d /tmp/icdquickcheck.XXXXXXXXXXX)
 function finish {
     #	  rm -rf "$tmpd"
@@ -15,10 +15,7 @@ function finish {
 trap finish EXIT
 #rsync -r --exclude=".git" "${ICD_HOME:-$HOME/rprojects/icd}" "$tmpd"
 pushd "$tmpd"
-"${whereami}"/build.sh \
-    --no-build-vignettes \
-    --no-manual \
-    --resave-data=no
+"${ICD_HOME}/tools/build-quick.sh"
 
 # try to unset debug flag, so ccache caches the results regardless of original path,
 # or configure ccache to do this
