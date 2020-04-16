@@ -616,7 +616,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -692,7 +691,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE}'
@@ -945,15 +943,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1091,7 +1080,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1244,7 +1233,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1274,12 +1262,15 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-icd-shutup     Enable peaceful compilation on travis with yes or no
   --disable-openmp        do not use OpenMP
-  --enable-icd-makevars   keep ~/.R/Makevars contents in binary for debugging
-                          (default is no)
+   --enable-icd-makevars   [keep ~/.R/Makevars contents in binary for
+                          debugging, default is no ]
+
   --enable-icd-strip      Enable stripping of binary on Linux and MacOS
 
 Some influential environment variables:
-  ICD_SHUTUP  "If ICD_SHUTUP is defined
+  ICD_SHUTUP  [If ICD_SHUTUP is defined, it tells configure to silence all
+              compiler warnings. Alternatively, use --enable-icd-shutup in
+              configure.]
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -1812,6 +1803,9 @@ ac_config_files="$ac_config_files src/Makevars"
 
 
 
+# Care with the following shell environment variables:
+# https://www.gnu.org/software/autoconf/manual/autoconf-2.66/html_node/Special-Shell-Variables.html
+#m4_ifdef([AC_DISABLE_OPTION_CHECKING], [], [])
 
 : ${R_HOME=$(R RHOME)}
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking R_HOME already set" >&5
@@ -1820,10 +1814,10 @@ if test -z "${R_HOME}"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: No" >&5
 $as_echo "No" >&6; }
     as_fn_error $? "Cannot proceed." "$LINENO" 5
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${R_HOME}" >&5
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${R_HOME}" >&5
 $as_echo "${R_HOME}" >&6; }
-R_BIN="${R_HOME}/bin/R"
+    R_BIN="${R_HOME}/bin/R"
 
 # Get R's C++11 preferred compiler, flags, std, and use these for C++, and C++11
 # but if --configure-vars is set, we want to let this override R's choice, e.g.
@@ -1832,35 +1826,35 @@ R_BIN="${R_HOME}/bin/R"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking R CXX11" >&5
 $as_echo_n "checking R CXX11... " >&6; }
 if test -z "$CXX11"; then
-  CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting ${CXX11}" >&5
+    CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting ${CXX11}" >&5
 $as_echo "Setting ${CXX11}" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using pre-set ${CXX11}" >&5
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using pre-set ${CXX11}" >&5
 $as_echo "Using pre-set ${CXX11}" >&6; }
-fi
+        fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking R CXX11STD" >&5
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking R CXX11STD" >&5
 $as_echo_n "checking R CXX11STD... " >&6; }
-if test -z "$CXX11STD"; then
-  CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting R ${CXX11STD}" >&5
+        if test -z "$CXX11STD"; then
+            CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting R ${CXX11STD}" >&5
 $as_echo "Setting R ${CXX11STD}" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using existing ${CXX11STD}" >&5
+            else
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using existing ${CXX11STD}" >&5
 $as_echo "Using existing ${CXX11STD}" >&6; }
-fi
+                fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking R CXX11FLAGS" >&5
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking R CXX11FLAGS" >&5
 $as_echo_n "checking R CXX11FLAGS... " >&6; }
-if test -z "$CXX11FLAGS"; then
-  CXX11FLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting R ${CXX11FLAGS}" >&5
+                if test -z "$CXX11FLAGS"; then
+                    CXX11FLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
+                    { $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting R ${CXX11FLAGS}" >&5
 $as_echo "Setting R ${CXX11FLAGS}" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using existing ${CXX11FLAGS}" >&5
+                    else
+                        { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using existing ${CXX11FLAGS}" >&5
 $as_echo "Using existing ${CXX11FLAGS}" >&6; }
-fi
+                        fi
 
 # We enforce at least C++11
 CXX=${CXX11}
@@ -1885,12 +1879,11 @@ fi
 
 
 if test "x$enable_icd-shutup" = "xyes"; then :
-
-       CXX11FLAGS="${CXX11FLAGS} -w"
+   CXX11FLAGS="${CXX11FLAGS} -w"
 
 fi
 
-# changes what R_OPENMP and rest of script does:
+# AC_LANG changes what R_OPENMP and rest of script does. See https://www.gnu.org/software/autoconf/manual/autoconf-2.63/html_node/Language-Choice.html . Affected by CXXFLAGS etc, so these should be set first if needed.
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -1900,8 +1893,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 # https://www.gnu.org/software/autoconf/manual/autoconf-2.67/html_node/Generic-Compiler-Characteristics.html
 # this macro is borrowed from R-devel source, and included in the icd /inst/m4 directory
 # --disable-openmp may then be passed to the configure script if needed.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking R core OpenMP m4 macro" >&5
-$as_echo_n "checking R core OpenMP m4 macro... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: R core OpenMP m4 macro" >&5
+$as_echo "$as_me: R core OpenMP m4 macro" >&6;}
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -2478,8 +2471,8 @@ $as_echo "$ac_cv_prog_cxx_openmp" >&6; }
 #  fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: completed check" >&5
-$as_echo "completed check" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: R core OpenMP m4 macro check completed." >&5
+$as_echo "$as_me: R core OpenMP m4 macro check completed." >&6;}
 
 
 # since some systems have broken OMP libraries
@@ -2502,69 +2495,73 @@ main ()
   return 0;
 }
 _ACEOF
-    PKG_CFLAGS="${OPENMP_CFLAGS}" PKG_LIBS="${OPENMP_CFLAGS}" "$R_BIN" CMD SHLIB conftest.c 1>&5 2>&5 && "$R_BIN" --vanilla -q -e "dyn.load(paste('conftest',.Platform\$dynlib.ext,sep=''))" 1>&5 2>&5 && ac_pkg_openmp=yes
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: OpenMP available and working: ${ac_pkg_openmp}" >&5
+    PKG_CFLAGS="${OPENMP_CFLAGS}" \
+        PKG_LIBS="${OPENMP_CFLAGS}" "$R_BIN" CMD SHLIB conftest.c 1>&5 2>&5 && "$R_BIN" --vanilla -q -e "dyn.load(paste('conftest',.Platform\$dynlib.ext,sep=''))" 1>&5 2>&5 && ac_pkg_openmp=yes
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: OpenMP available and working: ${ac_pkg_openmp}" >&5
 $as_echo "OpenMP available and working: ${ac_pkg_openmp}" >&6; }
-    else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: R did not think OpenMP is available" >&5
+            else
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: R did not think OpenMP is available" >&5
 $as_echo "R did not think OpenMP is available" >&6; }
-        fi
+                fi
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: icd thinks openmp compilation is possible: ${ac_pkg_openmp}" >&5
-$as_echo "icd thinks openmp compilation is possible: ${ac_pkg_openmp}" >&6; }
+                { $as_echo "$as_me:${as_lineno-$LINENO}: Does icd thinks openmp compilation is possible: ${ac_pkg_openmp}" >&5
+$as_echo "$as_me: Does icd thinks openmp compilation is possible: ${ac_pkg_openmp}" >&6;}
 
-        # if ${ac_pkg_openmp} = "yes" then we have OMP, otherwise it will be "no"
-        if test "${ac_pkg_openmp}" = no; then
-            ICD_OPENMP_FLAG=''
-        else
-            ICD_OPENMP_FLAG='$(SHLIB_OPENMP_CXXFLAGS)'
-        fi
+                # if ${ac_pkg_openmp} = "yes" then we have OMP, otherwise it will be "no"
+                if test "${ac_pkg_openmp}" = no; then
+                    ICD_OPENMP_FLAG=''
+                else
+                    ICD_OPENMP_FLAG='$(SHLIB_OPENMP_CXXFLAGS)'
+                fi
 
-
+#  Always write the stub as default to not include Makevars content:
 echo "unsigned char Makevars[] = { 0x00 };" > src/makevars.h
 
 # Check whether --enable-icd_makevars was given.
 if test "${enable_icd_makevars+set}" = set; then :
   enableval=$enable_icd_makevars;
-        if test "x$enable_icd_makevars" = "xyes"; then :
+               if test "x$enable_icd_makevars" = "xyes"; then :
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling Makevars inclusion for debugging" >&5
-$as_echo "$as_me: Enabling Makevars inclusion for debugging" >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking $HOME/.R exists" >&5
-$as_echo_n "checking $HOME/.R exists... " >&6; }
-      if test -d "$HOME/.R"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking $HOME/.R/Makevars exists" >&5
-$as_echo_n "checking $HOME/.R/Makevars exists... " >&6; }
-        if test -e "$HOME/.R/Makevars"; then
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-          echo 'unsigned char Makevars[] = {' > src/makevars.h
-          xxd -i < "$HOME/.R/Makevars" >> src/makevars.h
-          # must NULL terminate
-          echo ", 0x00 };" >> src/makevars.h
-        else
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-        fi
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      fi
+                      { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling home Makevars inclusion for debugging, if present" >&5
+$as_echo "$as_me: Enabling home Makevars inclusion for debugging, if present" >&6;}
+                      as_ac_File=`$as_echo "ac_cv_file_${HOME}/.R/Makevars" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HOME}/.R/Makevars" >&5
+$as_echo_n "checking for ${HOME}/.R/Makevars... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HOME}/.R/Makevars"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+                                     echo 'unsigned char Makevars[] = {' > src/makevars.h
+                                     xxd -i < "$HOME/.R/Makevars" >> src/makevars.h
+                                     # must NULL terminate
+                                     echo ", 0x00 };" >> src/makevars.h
 
 else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: ~/.R/Makevars not found." >&5
+$as_echo "$as_me: ~/.R/Makevars not found." >&6;}
+fi
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Not enabling Makevars inclusion due to --enable-icd-makevars=!yes" >&5
-$as_echo "$as_me: Not enabling Makevars inclusion due to --enable-icd-makevars=!yes" >&6;}
+
+elif { $as_echo "$as_me:${as_lineno-$LINENO}: --enable-icd-makevars=value is not set to yes" >&5
+$as_echo "$as_me: --enable-icd-makevars=value is not set to yes" >&6;}; then :
 
 fi
 
 else
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: Not enabling Makevars inclusion" >&5
-$as_echo "$as_me: Not enabling Makevars inclusion" >&6;}
-
+   { $as_echo "$as_me:${as_lineno-$LINENO}: makevars inclusion disabled" >&5
+$as_echo "$as_me: makevars inclusion disabled" >&6;}
 
 fi
 
@@ -2578,12 +2575,13 @@ else
 $as_echo "$as_me: icd strip enabled, with arguments..." >&6;}
 fi
 
-
+#
 if test "x$enable_icd_strip" != "xno"; then :
   ICD_STRIP=tools/mk/strip.mk
 else
   ICD_STRIP=''
 fi
+
 
 
 
