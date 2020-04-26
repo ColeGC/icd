@@ -20,7 +20,7 @@ pandoc: false
 latex: false
 use_devtools: false
 disable_homebrew: true
-# can/will also set any/all build/check args with environment variables.
+# can/will also set any/all build/check args with environment variables. --as-cran is default, which I do NOT want. Using tailored environment from tools/env/cran
 r_build_args: --no-build-vignettes --no-manual --resave-data=no
 r_check_args: --no-build-vignettes --no-manual --no-vignettes --ignore-vignettes --no-codoc
 os:
@@ -46,13 +46,13 @@ r_binary_packages:
 env:
   global:
     - ICD_SHUTUP=true
-    - ICD_MAKEFILE
     - ICD_MINI_BENCH=false
     - ICD_COVERAGE=false
     - ICD_TEST_SLOW=false
     - ICD_DATA_OFFLINE=true
     - ICD_DATA_INTERACT=false
     - ICD_KEEP_MAKEVARS=true
+    - R_CHECK_ENVIRON=tools/env/travis-global
 
 # Cannot export shell environment variables in these stanzas:
 # https://github.com/travis-ci/travis-ci/issues/7472
@@ -63,7 +63,7 @@ before_install:
   - tools/DESCRIPTION-minimalize.sh > DESC.min && mv -f DESC.min DESCRIPTION;
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
   - echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" |
-    tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron"
+    tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"
 
 before_script:
   - tools/dump-env.sh;
