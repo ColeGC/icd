@@ -20,13 +20,16 @@
 # autoreconf -fv && "${ICD_HOME:-.}/configure" --enable-icd-strip --enable-icd-shutup && cat "${ICD_HOME:-.}/src/Makevars" && grep -v -q '@' "${ICD_HOME:-.}/src/Makevars" || echo "MISSING REPLACEMENT"
 
 AC_PREREQ([2.62])
-AC_INIT(icd)
-AC_COPYRIGHT(Copyright (C) 2014 - 2020  Jack O. Wasey)
+AC_INIT(icd, [], [jack@jackwasey.com])
+AC_COPYRIGHT([Copyright (C) 2014 - 2020  Jack O. Wasey])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_FILES([src/Makevars])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_MACRO_DIR([inst/m4])
 
+# Care with the following shell environment variables:
+# https://www.gnu.org/software/autoconf/manual/autoconf-2.66/html_node/Special-Shell-Variables.html
+#m4_ifdef([AC_DISABLE_OPTION_CHECKING], [], [])
 
 : ${R_HOME=$(R RHOME)}
 AC_MSG_CHECKING([R_HOME already set])
@@ -90,14 +93,14 @@ AC_ARG_ENABLE([icd_shutup], AS_HELP_STRING([--enable-icd-shutup], [Peaceful comp
 
 AS_IF([test "x$enable_icd_shutup" = "xyes" || test "${ICD_SHUTUP+set}" = set ], [ICD_SHUTUP_FLAG="-w"])
 
-# changes what R_OPENMP and rest of script does:
+# AC_LANG changes what R_OPENMP and rest of script does. See https://www.gnu.org/software/autoconf/manual/autoconf-2.63/html_node/Language-Choice.html . Affected by CXXFLAGS etc, so these should be set first if needed.
 AC_LANG([C++])
 # https://www.gnu.org/software/autoconf/manual/autoconf-2.67/html_node/Generic-Compiler-Characteristics.html
 # this macro is borrowed from R-devel source, and included in the icd /inst/m4 directory
 # --disable-openmp may then be passed to the configure script if needed.
-AC_MSG_CHECKING([R core OpenMP m4 macro])
+AC_MSG_NOTICE([R core OpenMP m4 macro])
 R_OPENMP
-AC_MSG_RESULT([completed check])
+AC_MSG_NOTICE([R core OpenMP m4 macro check completed.])
 
 # since some systems have broken OMP libraries
 # we also check that the actual package will work

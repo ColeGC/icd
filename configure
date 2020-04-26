@@ -1817,6 +1817,9 @@ ac_config_files="$ac_config_files src/Makevars"
 
 
 
+# Care with the following shell environment variables:
+# https://www.gnu.org/software/autoconf/manual/autoconf-2.66/html_node/Special-Shell-Variables.html
+#m4_ifdef([AC_DISABLE_OPTION_CHECKING], [], [])
 
 : ${R_HOME=$(R RHOME)}
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking R_HOME already set" >&5
@@ -1905,7 +1908,7 @@ if test "x$enable_icd_shutup" = "xyes" || test "${ICD_SHUTUP+set}" = set ; then 
   ICD_SHUTUP_FLAG="-w"
 fi
 
-# changes what R_OPENMP and rest of script does:
+# AC_LANG changes what R_OPENMP and rest of script does. See https://www.gnu.org/software/autoconf/manual/autoconf-2.63/html_node/Language-Choice.html . Affected by CXXFLAGS etc, so these should be set first if needed.
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -1915,8 +1918,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 # https://www.gnu.org/software/autoconf/manual/autoconf-2.67/html_node/Generic-Compiler-Characteristics.html
 # this macro is borrowed from R-devel source, and included in the icd /inst/m4 directory
 # --disable-openmp may then be passed to the configure script if needed.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking R core OpenMP m4 macro" >&5
-$as_echo_n "checking R core OpenMP m4 macro... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: R core OpenMP m4 macro" >&5
+$as_echo "$as_me: R core OpenMP m4 macro" >&6;}
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -2493,8 +2496,8 @@ $as_echo "$ac_cv_prog_cxx_openmp" >&6; }
 #  fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: completed check" >&5
-$as_echo "completed check" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: R core OpenMP m4 macro check completed." >&5
+$as_echo "$as_me: R core OpenMP m4 macro check completed." >&6;}
 
 # since some systems have broken OMP libraries
 # we also check that the actual package will work
