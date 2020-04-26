@@ -39,6 +39,7 @@ r:
 r_binary_packages:
   - Rcpp
   - RcppEigen
+  - R6
   - rappdirs
   - testthat
 
