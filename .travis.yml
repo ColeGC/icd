@@ -78,8 +78,7 @@ before_install:
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
   - tools/DESCRIPTION-minimalize.sh > DESC.min && mv -f DESC.min DESCRIPTION;
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
-  - [[ "$TRAVIS_R_VERSION" != "4.0.0" ]] && echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" |
-    tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"
+  - if [[ "$TRAVIS_R_VERSION" != "4.0.0" ]]; then echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" | tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"
     #- Rscript -e 'update.packages(checkBuilt=TRUE, ask=FALSE)'
     #- Rscript -e 'install.packages(c("callr", "cli",  "R6"), dependencies=NA)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
 
