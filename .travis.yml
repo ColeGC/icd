@@ -30,7 +30,9 @@ os:
   - osx
 
 # default 2020-04-01 is xenial, not bionic
-dist: xenial
+dist: 
+  - xenial
+  - bionic
 
 r:
   - devel
@@ -71,13 +73,20 @@ addons:
 env:
   global:
     - ICD_SHUTUP=true
-    - ICD_MINI_BENCH=false
-    - ICD_COVERAGE=false
+      #- ICD_MINI_BENCH=false
+      #- ICD_COVERAGE=false
     - ICD_TEST_SLOW=false
     - ICD_DATA_OFFLINE=true
     - ICD_DATA_INTERACT=false
     - ICD_KEEP_MAKEVARS=true
     - R_CHECK_ENVIRON=tools/env/travis-global
+
+jobs:
+  include:
+      - os: linux
+      - r: release
+      - dist: bionic
+      - env: ICD_MINI_BENCH=true ICD_COVERAGE=true ICD_TEST_SLOW=true
 
 # Cannot export shell environment variables in these stanzas:
 # https://github.com/travis-ci/travis-ci/issues/7472
