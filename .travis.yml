@@ -42,7 +42,7 @@ r_binary_packages:
   - RcppEigen
   - testthat
   - rappdirs
-  - ' --no-install-recommends' # this, amazingly, works
+  - 'Rcpp --no-install-recommends' # this, amazingly, works
 # temporarily disabled because of R6 depdence, which isn't built for CRAN yet with R-4.0.0
 # adding other testthat deps here in the meantime? R6 and callr trouble so far. travis R installs apt recommended packages, which often bring in testthat, then problems. Probably because i've now let apt cran builds take precedence?
 # - testthat
