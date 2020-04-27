@@ -40,10 +40,9 @@ r:
 r_binary_packages:
   - Rcpp
   - RcppEigen
-  - digest
-  - 'digest --no-install-recommends' # this will never work!
   - testthat
   - rappdirs
+  - 'digest --no-install-recommends' # this  amazingly works
 # temporarily disabled because of R6 depdence, which isn't built for CRAN yet with R-4.0.0
 # adding other testthat deps here in the meantime? R6 and callr trouble so far. travis R installs apt recommended packages, which often bring in testthat, then problems. Probably because i've now let apt cran builds take precedence?
 # - testthat
@@ -80,7 +79,8 @@ before_install:
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
   - echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" |
     tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"
-  - Rscript -e 'update.packages(checkBuilt=TRUE); install.packages(c("R6", "callr"), dependencies = FALSE)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
+  - Rscript -e 'update.packages(checkBuilt=TRUE, ask=FALSE)'
+  - Rscript -e 'install.packages(c("callr", "R6"), dependencies=NA)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
 
 before_script:
   - tools/dump-env.sh;
