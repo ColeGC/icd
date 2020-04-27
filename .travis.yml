@@ -41,7 +41,7 @@ r_binary_packages:
   - Rcpp
   - RcppEigen
   - digest
-  - '--no-install-recommends' # this will never work!
+  - 'digest --no-install-recommends' # this will never work!
   - testthat
   - rappdirs
 # temporarily disabled because of R6 depdence, which isn't built for CRAN yet with R-4.0.0
