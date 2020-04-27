@@ -11,7 +11,9 @@
 # https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/script/r.rb
 language: r
 # ccache would need installing, configuring, can't just add ccache here, I don't think. Would it cache between builds if not here?
-cache: packages
+cache:
+  - packages
+  - $HOME/.ccache
 # TODO: make warnings cause job failure once environment is fixed
 warnings_are_errors: false
 # I think fortran may be a downstream dependency of RcppEigen, but start v minimal. fortran config only recognized on osx travis builds?
@@ -34,6 +36,12 @@ r:
   - devel
   - release
   - oldrel
+
+
+addons:
+  apt:
+    packages:
+     - ccache
 
 # Rcpp*, rappdirs and testthat all contain compiled code, so including here for much faster travis init.
 # However, the R travis ruby script installs Depends _and_ Recommended r-cran-xxx, and this commonly brings in r-cran-testthat, and thus a ton of dependencies. This is fine, except some are not built for R-4.0.0 yet: at least R6 and callr. Thus I want here to install as many dependencies here, which do nor Depend on testthat, R6, callr and cli? Dirk Eddelbeuttel suggests there is a bug with circular testthat and pkgbuild dependency.
@@ -76,6 +84,9 @@ env:
 before_install:
   - tools/dump-env.sh;
   - mkdir -p ~/.R;
+# see https://pat-s.me/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
+  - mkdir $HOME/.R && echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nC11=$(CCACHE) g++$(VER)\nC14=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)' > $HOME/.R/Makevars
+  - echo -e 'max_size = 5.0G\nsloppiness = include_file_ctime\nhash_dir=false' > $HOME/.ccache/ccache.conf
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
   - tools/DESCRIPTION-minimalize.sh > DESC.min && mv -f DESC.min DESCRIPTION;
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
