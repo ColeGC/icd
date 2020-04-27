@@ -35,25 +35,28 @@ r:
   - release
   - oldrel
 
-# Rcpp*, rappdirs and testthat all contain compiled code.
+# Rcpp*, rappdirs and testthat all contain compiled code, so including here for much faster travis init.
+# However, the R travis ruby script installs Depends _and_ Recommended r-cran-xxx, and this commonly brings in r-cran-testthat, and thus a ton of dependencies. This is fine, except some are not built for R-4.0.0 yet: at least R6 and callr. Thus I want here to install as many dependencies here, which do nor Depend on testthat, R6, callr.
 r_binary_packages:
   - Rcpp
   - RcppEigen
+  - digest
+  - '--no-install-recommends' # this will never work!
+  - testthat
   - rappdirs
 # temporarily disabled because of R6 depdence, which isn't built for CRAN yet with R-4.0.0
-# adding other testthat deps here in the meantime? Or R6 from CRAN in before_install.
-  - testthat
-    #  - assertthat
-    #  - cli
-    #  - crayon
-    #  - digest
-    #  - evaluate
-    #  - magrittr
-    #  - praise
-    #  - rlang
-    #  - rmarkdown
-    #  - withr
-    #  - xml2
+# adding other testthat deps here in the meantime? R6 and callr trouble so far. travis R installs apt recommended packages, which often bring in testthat, then problems. Probably because i've now let apt cran builds take precedence?
+# - testthat
+#- assertthat
+#- cli
+#   - crayon
+# - evaluate
+#   - magrittr
+#      - praise
+#      - rlang
+# - rmarkdown
+#  - withr
+#  - xml2
 
 # see also travis-global environment file
 env:
@@ -77,7 +80,7 @@ before_install:
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
   - echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" |
     tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"
-  - Rscript -e 'install.packages(c("R6", "callr"), dependencies = FALSE)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
+  - Rscript -e 'update.packages(checkBuilt=TRUE); install.packages(c("R6", "callr"), dependencies = FALSE)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
 
 before_script:
   - tools/dump-env.sh;
