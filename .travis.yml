@@ -14,7 +14,7 @@ language: r
 cache: packages
 # TODO: make warnings cause job failure once environment is fixed
 warnings_are_errors: false
-# I think fortran may be a downstream dependency of RcppEigen, but start v minimal
+# I think fortran may be a downstream dependency of RcppEigen, but start v minimal. fortran config only recognized on osx travis builds?
 fortran: false
 pandoc: false
 latex: false
@@ -39,9 +39,21 @@ r:
 r_binary_packages:
   - Rcpp
   - RcppEigen
-  - R6
   - rappdirs
+# temporarily disabled because of R6 depdence, which isn't built for CRAN yet with R-4.0.0
+# adding other testthat deps here in the meantime? Or R6 from CRAN in before_install.
   - testthat
+    #  - assertthat
+    #  - cli
+    #  - crayon
+    #  - digest
+    #  - evaluate
+    #  - magrittr
+    #  - praise
+    #  - rlang
+    #  - rmarkdown
+    #  - withr
+    #  - xml2
 
 # see also travis-global environment file
 env:
@@ -65,6 +77,7 @@ before_install:
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
   - echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" |
     tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"
+  - Rscript -e 'install.packages("R6", dependencies = FALSE)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
 
 before_script:
   - tools/dump-env.sh;
