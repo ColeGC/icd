@@ -92,10 +92,10 @@ jobs:
 # https://github.com/travis-ci/travis-ci/issues/7472
 before_install:
   - tools/dump-env.sh;
-  - mkdir -p ~/.R;
+  - mkdir -p $HOME/.R;
 # see https://pat-s.me/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
-  - mkdir $HOME/.R && echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nC11=$(CCACHE) g++$(VER)\nC14=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)' > $HOME/.R/Makevars
-  - echo -e 'max_size = 5.0G\nsloppiness = include_file_ctime\nhash_dir=false' > $HOME/.ccache/ccache.conf
+  - echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nC11=$(CCACHE) g++$(VER)\nC14=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)' >> $HOME/.R/Makevars
+  - echo -e 'max_size = 5.0G\nsloppiness = include_file_ctime\nhash_dir=false' >> $HOME/.ccache/ccache.conf
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
   - tools/DESCRIPTION-minimalize.sh > DESC.min && mv -f DESC.min DESCRIPTION;
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
