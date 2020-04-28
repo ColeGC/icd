@@ -107,7 +107,7 @@ before_install:
 before_script:
   - tools/dump-env.sh;
   - if [[ "$ICD_TRAVIS_HEAVY" == "true" ]]; then
-    cp -f DESC.orig DESCRIPTION
+    cp -f DESC.orig DESCRIPTION;
     fi;
     # now fully install all necessary dependencies for the 'heavy' build
   - Rscript -e 'deps <- remotes::dev_package_deps(dependencies = NA); remotes::install_deps(dependencies = TRUE);'
