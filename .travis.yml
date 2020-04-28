@@ -90,6 +90,8 @@ env:
 before_install:
   - tools/dump-env.sh;
   - mkdir -p $HOME/.R;
+    # if mixed source/binary, e.g., macos, do not upgrade (if even asked) if source is newer.
+  - echo 'options(install.packages.check.source = "no")' >> $HOME/.Rprofile;
 # see https://pat-s.me/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
 # may not have ccache without brew on macos. Use recursive dependency evaluation of Make here.
   #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cp tools/mk/travis-macos.mk $HOME/Makevars; fi;
@@ -99,18 +101,21 @@ before_install:
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
     # the DESCRIPTION file is used to determine required dependenices, including many that we do not ever, or usually, need on travis. E.g. we never rebuild RData on travis, nor process XML from the ICD sources. For building vignettes, will have to manually install relevant dependencies later, or accept tthe regular description here, and the fact the travis will take ages and fail often.
   - tools/DESCRIPTION-minimalize.sh > DESC.min && cp DESCRIPTION DESC.orig && cp -f DESC.min DESCRIPTION;
+    # workaround osx/R-devel travis issue, where binary packages missing from CRAN.
+  - if [[ "$TRAVIS_R_VERSION" == "devel" ]] && [[ "$TRAVIS_R_OS" == "osx" ]] && echo "option(pkgType='source')" >> ~/.R/.Rprofile;
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
     #  - if [[ "$TRAVIS_R_VERSION" != "4.0.0" ]]; then echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" | tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"; fi
     #- Rscript -e 'update.packages(checkBuilt=TRUE, ask=FALSE)'
-    #- Rscript -e 'install.packages(c("callr", "cli",  "R6"), dependencies=NA)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.0
+    #- Rscript -e 'install.packages(c("callr", "cli",  "R6"), dependencies=NA)' # in order that testthat apt CRAN binary is met while travis is catching up with R-4.0.E0
 
 before_script:
   - tools/dump-env.sh;
+    # now fully install all necessary dependencies for the 'heavy' build. Do not need to recreate data, so not that much in fact.
   - if [[ "$ICD_TRAVIS_HEAVY" == "true" ]]; then
     cp -f DESC.orig DESCRIPTION;
+    sed -i '/vignette\\\.Rnw\$$/d' .Rbuildignore;
+    Rscript -e 'install.packages(c("knitr", "nhds", "rmarkdown"))';
     fi;
-    # now fully install all necessary dependencies for the 'heavy' build
-  - Rscript -e 'deps <- remotes::dev_package_deps(dependencies = NA); remotes::install_deps(dependencies = TRUE);'
 
 after_success:
   - tools/dump-env.sh
@@ -146,8 +151,9 @@ jobs:
         - ICD_MINI_BENCH=true
         - ICD_COVERAGE=true
         - ICD_TEST_SLOW=true
+        - ICD_TRAVIS_HEAVY=true
       r_build_args: --resave-data=yes
-      r_check_args: --no-build-vignettes --no-vignettes --ignore-vignettes --no-codoc --no-manual
+      r_check_args: --no-codoc --no-manual
 
 
 notifications:
