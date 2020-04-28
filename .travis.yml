@@ -30,7 +30,7 @@ os:
   - osx
 
 # default 2020-04-01 is xenial, not bionic
-dist: 
+dist:
   - xenial
   - bionic
 
@@ -92,9 +92,9 @@ before_install:
   - mkdir -p $HOME/.R;
 # see https://pat-s.me/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
 # may not have ccache without brew on macos. Use recursive dependency evaluation of Make here.
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cp tools/mk/travis-macos.mk $HOME/Makevars; fi;
+  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cp tools/mk/travis-macos.mk $HOME/Makevars; fi;
   - if command -v ccache >/dev/null; then echo -e 'CCACHE=ccache\n' >> $HOME/.R/Makevars; fi;
-  - echo -e 'VER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nCXX11=$(CCACHE) g++$(VER)\nCXX14=$(CCACHE) g++$(VER)\nCXX17=$(CCACHE) g++$(VER)\nCXX20=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)' >> $HOME/.R/Makevars;
+  #- echo -e 'VER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nCXX11=$(CCACHE) g++$(VER)\nCXX14=$(CCACHE) g++$(VER)\nCXX17=$(CCACHE) g++$(VER)\nCXX20=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)' >> $HOME/.R/Makevars;
   - cp tools/travis-ccache.conf $HOME/.ccache/ccache.conf;
   - echo '^vignettes\/.*-vignette\.Rnw$' >> .Rbuildignore;
     # the DESCRIPTION file is used to determine required dependenices, including many that we do not ever, or usually, need on travis. E.g. we never rebuild RData on travis, nor process XML from the ICD sources. For building vignettes, will have to manually install relevant dependencies later, or accept tthe regular description here, and the fact the travis will take ages and fail often.
