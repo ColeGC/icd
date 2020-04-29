@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set +e +o pipefail
+set +e 
 set -x
 # dump all possibly relevant environment, to help Travis debugging in particular.
 #exec >&2
@@ -30,25 +30,17 @@ RHE="${RH}/etc"
 echo "R RHOME gives '${RH}'" >&2
 
 #find "${HOME}/.R" -print -exec cat '{}' \;
-cat "${RHE}/Renviron"
-cat "${RHE}/Renviron.site"
-cat "${HOME}/.Renviron"
-cat "${HOME}/.R/check.Renviron"
-cat "${HOME}/.R/build.Renviron"
-
-# profile
-cat "${RHE}/Rprofile.site"
-cat "${HOME}/.Rprofile"
-
-# compiled code
-cat "${RHE}/Makeconf"
-cat "${RHE}/Makevars.site"
-cat "${RHE}/ldpaths"
+for f in {"${RHE}","${HOME}"}/{,./,.R/}{,check-,build-}{ldpaths,Makeconf,Makevars,Renviron,Rprofile}{.site,}; do
+    if [[ -f "$f" ]]; then
+        cat "$f"
+    else
+        echo "$f does not exist"
+    fi
+done
 
 R CMD config --all
 
 ls -R ~/.R
-#ls -R "${PWD}"
 
 # R
 
@@ -70,7 +62,7 @@ for lib in "${pths[@]}"; do
     }
 done
 
-R --slave <<_EOF
+R --no-save <<_EOF
 options()
 options(echo=TRUE)
 print.default(.libPaths(), quote = FALSE)
