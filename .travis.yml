@@ -81,9 +81,6 @@ env:
     - ICD_DATA_INTERACT=false
     - ICD_KEEP_MAKEVARS=true
     - R_CHECK_ENVIRON=tools/env/travis-global
-      #- ICD_MINI_BENCH=false
-      #- ICD_COVERAGE=false
-      #- ICD_TRAVIS_HEAVY=false
 
 # Cannot export shell environment variables in these stanzas:
 # https://github.com/travis-ci/travis-ci/issues/7472
@@ -147,6 +144,7 @@ jobs:
   exclude:
     - os: osx
       r: devel
+      fortran: false
   include:
     - os: osx
       r: devel
