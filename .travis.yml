@@ -144,7 +144,13 @@ jobs:
     - r: oldrel
     - r: devel
     - dist: bionic
+  exclude:
+    - os: osx
+      r: devel
   include:
+    - os: osx
+      r: devel
+      fortran: true
     - os: linux
       r: release
       dist: bionic
