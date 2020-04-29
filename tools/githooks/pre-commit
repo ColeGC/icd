@@ -38,18 +38,22 @@ if [[ ${#README[@]} != 0 ]] && [[ README.Rmd -nt README.md ]]; then
     };
 fi
 
+# check copyright dates, and fix
+#sed -i -E -e '/(Copyright \(C\) 2014-201)[[:digit]]/s/(Copyright \(C\) 2014-20)[[:digit:]]{2}[[:space:]]+/\1'$(date +"%y")' Jack/'
+#ok+=$(grep -r -E -e 'Copyright.* 2014[ -]+2019' ./* | tee /dev/stderr | wc -l)
+
 # TODO add check for copyright dates and package version string in several places
 # TODO shellcheck bash scripts
 
 wcres=$(git diff --name-only |
     grep -c -e "README.md" -e "codemeta.json"
     )
-if (( wcres != 0 )); then
-    echo "pre-commit updated files:"
-    git diff --name-only
-    echo "review and commit these changes"
-    ok=1
-fi
+    if (( wcres != 0 )); then
+        echo "pre-commit updated files:"
+        git diff --name-only
+        echo "review and commit these changes"
+        ok=1
+    fi
 
-(( ok != 0 )) && echo "githooks/pre-commit failed" >&1 && exit ${ok}
-exit 0
+    (( ok != 0 )) && echo "githooks/pre-commit failed" >&1 && exit ${ok}
+    exit 0
