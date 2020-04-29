@@ -65,14 +65,19 @@ done
 R --no-save <<_EOF
 options()
 options(echo=TRUE)
+R.version
 print.default(.libPaths(), quote = FALSE)
-.Platform
-.dynLibs()
 .Library
 .Library.site
+#.Machine
+.Platform
+Sys.info()
+.dynLibs()
 searchpaths()
 search()
-sessionInfo() 
+capabilities()
+sessionInfo()
+extSoftVersion()
 if (requireNamespace("sessioninfo", quietly = TRUE, warn.conflicts = FALSE)) sessioninfo::session_info()
 _EOF
 

@@ -102,7 +102,10 @@ before_install:
     # the DESCRIPTION file is used to determine required dependenices, including many that we do not ever, or usually, need on travis. E.g. we never rebuild RData on travis, nor process XML from the ICD sources. For building vignettes, will have to manually install relevant dependencies later, or accept tthe regular description here, and the fact the travis will take ages and fail often.
   - tools/DESCRIPTION-minimalize.sh > DESC.min && cp DESCRIPTION DESC.orig && cp -f DESC.min DESCRIPTION;
     # workaround osx/R-devel travis issue, where binary packages missing from CRAN. May well be useful on other combos.
-  - if [[ "$TRAVIS_R_VERSION" == "devel" ]] && [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo "options(pkgType='source')" >> ~/.Rprofile; fi;
+  - if [[ "$TRAVIS_R_VERSION" == "devel" ]] && [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    echo "options(pkgType='source')" >> ~/.Rprofile;
+    Rscript -e 'remotes::install_deps(dependencies = NA, upgrade = FALSE, type = "source");';
+    fi;
     # check by default ignores user paths, and the library path doesn't include the r_binary_packages paths, AFAICT. DYLD_LIBRARY_PATH for MacOS may be needed for brew-installed compilers?
     #  - if [[ "$TRAVIS_R_VERSION" != "4.0.0" ]]; then echo "R_LD_LIBRARY_PATH=/usr/lib/R/site-library/RcppEigen/libs:/usr/lib/R/site-library/Rcpp/libs:${R_LD_LIBRARY_PATH}" | tee -a "${HOME}/.R/Renviron" "${HOME}/.R/build.Renviron" "${HOME}/.R/check.Renviron" "tools/env/travis-global"; fi
     #- Rscript -e 'update.packages(checkBuilt=TRUE, ask=FALSE)'
