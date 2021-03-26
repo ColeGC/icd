@@ -2,7 +2,7 @@ Package: icd
 Title: Comorbidity Calculations and Tools for ICD-9 and ICD-10
     Codes
 Version: 4.0.9
-Authors@R: 
+Authors@R:
     c(person(given = "Jack O.",
              family = "Wasey",
              role = c("aut", "cre", "cph"),
@@ -27,6 +27,14 @@ Authors@R:
              family = "Lee",
              role = "ctb",
              comment = "explain codes in table format"),
+      person(given = "Patrick",
+             family = "McCormick",
+             role = "ctb",
+             email = "patrick@patrickmd.net",
+             comment = "Multiple great pull requests"),
+      person(given = "Alessandro",
+             family = "Gasparini",
+             role = "ctb"),
       person(given = "Michel",
              family = "Lang",
              role = "aut",

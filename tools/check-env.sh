@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # run a package check using a given set of environment variables
 
 #shellcheck disable=SC2012,SC1091
 #shellcheck source=find-icd-home.sh
-set -euo pipefail
+set -eu
 IFS=$'\n\t'
 function whereami() {
     local dir SOURCE

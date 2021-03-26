@@ -76,10 +76,10 @@ env:
   global:
     - ICD_SHUTUP=true
     - ICD_TEST_SLOW=false
-    - ICD_DATA_OFFLINE=true
-    - ICD_DATA_INTERACT=false
+    - ICD_OFFLINE=true
+    - ICD_INTERACT=false
     - ICD_KEEP_MAKEVARS=true
-    - R_CHECK_ENVIRON=tools/env/travis-global
+    - R_CHECK_ENVIRON=tools/env/travis
 
 # Cannot export shell environment variables in these stanzas:
 # https://github.com/travis-ci/travis-ci/issues/7472
@@ -126,9 +126,11 @@ after_success:
     cd ../..;
     fi
   - if [[ "$ICD_COVERAGE" == "true" ]]; then
-     Rscript -e 'source("tools/split-tests.R"); testthat_split();';
-     Rscript -e 'install.packages("covr"); covr::codecov(quiet = FALSE)';
-   fi
+    Rscript -e 'source("tools/split-tests.R"); testthat_split();';
+    Rscript -e 'install.packages("remotes", dependencies = FALSE)';
+    Rscript -e 'remotes::install_github("r-lib/covr"); covr::codecov(quiet = FALSE)';
+    fi
+   # consider something like this, if needed for it to work, or at least shut up Eigen warnings: Rscript -e "options(covr.flags = list(CXXFLAGS = '', LDFLAGS = '')); covr::codecov()"
 
 after_failure:
   - tools/dump-env.sh;
